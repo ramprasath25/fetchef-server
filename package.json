@@ -10,7 +10,10 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "fs": "0.0.1-security",
     "mongodb": "^3.0.5",
+    "morgan": "^1.9.0",
+    "path": "^0.12.7",
     "restify": "^7.0.0",
     "restify-errors": "^6.0.0",
     "restify-router": "^0.5.0"
