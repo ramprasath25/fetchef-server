@@ -1,10 +1,11 @@
-'use strict'
+
 const restify = require('restify');
-const error = require('restify-errors');
+const restError = require('restify-errors');
 const mongodb = require('mongodb').MongoClient;
 const logger = require('morgan');
 const fs = require('fs');
 const path = require('path');
+const jwt = require('jsonwebtoken');
 const config = require('./config');
 const loginRoutes = require('./router/login');
 const userRoutes = require('./router/userRoutes');
@@ -13,7 +14,6 @@ const server = restify.createServer({
     name: config.appName,
     version: config.appVersion
 });
-server.use(logger('dev'));
 server.use(restify.plugins.acceptParser(server.acceptable));
 server.use(restify.plugins.queryParser({ mapParams: true }));
 server.use(restify.plugins.fullResponse());
@@ -38,16 +38,21 @@ server.use(logger('dev', {
     }
 }));
 // Authentication
-server.use(function(req, res, next) {    
-    if (req.url.startsWith('/') || req.url.startsWith('/login/*')) {
+server.use(function(req, res, next) {   
+    if (req.url.startsWith('/login')) {
         return next();
     } else {        
-        const token = req.headers['x-access-token'];
-        
+        const token = req.headers['x-access-token'];        
         if (token) {
-            return next();
+            jwt.verify(token, config.secret, (err, decode)=> {
+                if(err) {
+                    return next(new restError.NotAuthorizedError("Token not found"))
+                } else {
+                    return next();
+                }
+            });
         } else {
-            return next(new error.NotAuthorizedError("Token Not found"));
+            return next(new restError.NotAuthorizedError("Token Not found"));
         }
     }
 })
@@ -63,6 +68,7 @@ server.listen(config.appPort, () =>{
         if (err) {
             console.log('Error connecting to mongodb');
         } else {
+            
             console.log('Server running at', server.name, server.url);
         }
     });
