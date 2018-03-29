@@ -1,7 +1,6 @@
 
 const restify = require('restify');
 const restError = require('restify-errors');
-const mongodb = require('mongodb').MongoClient;
 const logger = require('morgan');
 const fs = require('fs');
 const path = require('path');
@@ -39,7 +38,7 @@ server.use(logger('dev', {
 }));
 // Authentication
 server.use(function(req, res, next) {   
-    if (req.url.startsWith('/login')) {
+    if (req.url.startsWith('/login') || req.url.startsWith('/')) {
         return next();
     } else {        
         const token = req.headers['x-access-token'];        
@@ -57,6 +56,12 @@ server.use(function(req, res, next) {
     }
 })
 server.get('/', (req, res) => {
+    // console.log(config)
+    const db = config.db;
+    const myColl = db.collection('roles')
+    myColl.find((err, docs) => {
+        console.log(docs)
+    });
     res.send(200, "Rest API Server");
 });
 
@@ -64,12 +69,5 @@ loginRoutes.applyRoutes(server, '/login');
 userRoutes.applyRoutes(server, '/user');
 
 server.listen(config.appPort, () =>{
-    mongodb.connect(config.mongodbURI, (err, db) => {
-        if (err) {
-            console.log('Error connecting to mongodb');
-        } else {
-            
-            console.log('Server running at', server.name, server.url);
-        }
-    });
+    console.log('Server running at', server.name, server.url);
 });
