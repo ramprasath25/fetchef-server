@@ -3,21 +3,28 @@ const router = new Router();
 const jwt = require('jsonwebtoken');
 const config = require('../config');
 const tokenList = {};
+const db = config.db;
+// User Login
 router.post('/', (req, res) => {
     const user = {
-        username: req.body.username,
-        password: req.body.password
+        name: req.body.name,
+        email: req.body.email
     }
-    
+    const data = req.body;
+    console.log(data);
     const token = jwt.sign(user, config.secret, {expiresIn: config.tokenLife});
     const refreshToken = jwt.sign(user, config.refreshToken, {expiresIn: config.refreshTokenLife});
-    const response = {
-        message: "Logged in successfully",
-        token: token,
-        refreshToken: refreshToken
-    }
-    tokenList[refreshToken] = response;
-    res.send(200, response);
+    data.refreshToken = refreshToken;
+    const myColl = db.collection('users')
+    myColl.save(data, (err, docs) => {
+        console.log(err);
+        if(err) {
+            res.send(500, "Internal server error");
+        } else {
+            tokenList[refreshToken] = docs;
+            res.send(200, docs);
+        }
+    });
 });
 
 router.post('/token', (req, res) => {
