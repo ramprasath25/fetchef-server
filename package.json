@@ -17,6 +17,7 @@
     "morgan": "^1.9.0",
     "path": "^0.12.7",
     "restify": "^6.0.0",
+    "restify-cors-middleware": "^1.1.0",
     "restify-errors": "^6.0.0",
     "restify-router": "^0.5.0"
   }

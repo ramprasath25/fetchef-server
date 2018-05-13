@@ -5,6 +5,7 @@ const logger = require('morgan');
 const fs = require('fs');
 const path = require('path');
 const jwt = require('jsonwebtoken');
+const corsMiddleware = require('restify-cors-middleware');
 const config = require('./config');
 const loginRoutes = require('./router/login');
 const userRoutes = require('./router/userRoutes');
@@ -17,7 +18,12 @@ server.use(restify.plugins.acceptParser(server.acceptable));
 server.use(restify.plugins.queryParser({ mapParams: true }));
 server.use(restify.plugins.fullResponse());
 server.use(restify.plugins.bodyParser());
-
+const cors = corsMiddleware({
+    origins:['*'],
+    allowHeaders: ['x-access-token']
+});
+server.pre(cors.preflight)
+server.use(cors.actual)
 //Logs
 const logPath = path.join(__dirname, 'logs', 'access.log');
 if(fs.existsSync(logPath)) {
@@ -38,7 +44,7 @@ server.use(logger('dev', {
 }));
 // Authentication
 server.use(function(req, res, next) {   
-    if (req.url.startsWith('/login') || req.url.startsWith('/')) {
+    if (req.url.startsWith('/login')) {
         return next();
     } else {        
         const token = req.headers['x-access-token'];        
