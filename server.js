@@ -9,21 +9,33 @@ const corsMiddleware = require('restify-cors-middleware');
 const config = require('./config');
 const loginRoutes = require('./router/login');
 const userRoutes = require('./router/userRoutes');
+const corsMiddleware = require('restify-cors-middleware');
 
 const server = restify.createServer({
     name: config.appName,
     version: config.appVersion
 });
+const cors = corsMiddleware({
+    preflightMaxAge: 5,
+    origins: ['*'],
+    allowHeaders: ['API-Token'],
+    exposeHeaders: ['API-Token-Expiry']
+})
 server.use(restify.plugins.acceptParser(server.acceptable));
 server.use(restify.plugins.queryParser({ mapParams: true }));
 server.use(restify.plugins.fullResponse());
 server.use(restify.plugins.bodyParser());
+<<<<<<< HEAD
 const cors = corsMiddleware({
     origins:['*'],
     allowHeaders: ['x-access-token']
 });
 server.pre(cors.preflight)
 server.use(cors.actual)
+=======
+server.pre(cors.preflight);
+server.use(cors.actual);
+>>>>>>> fdffdef4eb5aa8d8204d9b2ff10673bef0dd0c55
 //Logs
 const logPath = path.join(__dirname, 'logs', 'access.log');
 if(fs.existsSync(logPath)) {
@@ -46,7 +58,7 @@ server.use(logger('dev', {
 server.use(function(req, res, next) {   
     if (req.url.startsWith('/login')) {
         return next();
-    } else {        
+    } else {
         const token = req.headers['x-access-token'];        
         if (token) {
             jwt.verify(token, config.secret, (err, decode)=> {

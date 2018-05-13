@@ -1,5 +1,5 @@
 const mongojs = require('mongojs');
-const db = mongojs('restapi');
+const db = mongojs('restifyfood');
 
 const tokenConfig = {
     secret: 'rest-api',
